@@ -36,10 +36,19 @@ var FlappyBird;
             _this.anchor.setTo(0.5, 0.5);
             _this.animations.add("flap");
             _this.animations.play("flap", 12, true);
+            // enable physics on the bird
+            // and disable gravity on the bird
+            // until the game is started
+            // also make sure the collisions are using circular body
+            _this.game.physics.arcade.enableBody(_this);
+            _this.body.allowGravity = true;
+            _this.body.collideWorldBounds = true;
             return _this;
         }
         Bird.prototype.flap = function () {
             if (this.alive) {
+                //cause our bird to "jump" upward
+                this.body.velocity.y = -400;
                 // rotate the bird to -40 degrees
                 this.game.add.tween(this).to({ angle: -40 }, 100).start();
             }
@@ -63,6 +72,13 @@ var FlappyBird;
             var _this = _super.call(this, game, x, y, width, height, "ground") || this;
             // start scrolling our ground
             _this.autoScroll(-200, 0);
+            // enable physics on the ground sprite
+            // this is needed for collision detection
+            _this.game.physics.arcade.enableBody(_this);
+            // we don't want the ground's body
+            // to be affected by gravity or external forces
+            _this.body.allowGravity = false;
+            _this.body.immovable = true;
             return _this;
         }
         return Ground;
@@ -77,6 +93,10 @@ var FlappyBird;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         PlayState.prototype.create = function () {
+            // start the phaser arcade physics engine
+            this.game.physics.startSystem(Phaser.Physics.ARCADE);
+            // give our world an initial gravity of 1200
+            this.game.physics.arcade.gravity.y = 1200;
             this.background = this.game.add.sprite(0, 0, "background");
             this.bird = new FlappyBird.Bird(this.game, 100, this.game.height / 2, 0);
             this.game.add.existing(this.bird);
@@ -86,6 +106,10 @@ var FlappyBird;
             this.game.input.onDown.add(this.bird.flap, this.bird);
         };
         PlayState.prototype.update = function () {
+            // enable collisions between the bird and the ground
+            this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+        };
+        PlayState.prototype.deathHandler = function (bird, enemy) {
         };
         return PlayState;
     }(Phaser.State));

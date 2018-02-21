@@ -7,10 +7,20 @@ namespace FlappyBird {
             this.anchor.setTo(0.5, 0.5);
             this.animations.add("flap");
             this.animations.play("flap", 12, true);
+
+            // enable physics on the bird
+            // and disable gravity on the bird
+            // until the game is started
+            // also make sure the collisions are using circular body
+            this.game.physics.arcade.enableBody(this);
+            this.body.allowGravity = true;
+            this.body.collideWorldBounds = true;
         }
 
         flap() {
             if(this.alive) {
+                //cause our bird to "jump" upward
+                this.body.velocity.y = -400;
                 // rotate the bird to -40 degrees
                 this.game.add.tween(this).to({angle: -40}, 100).start();
             } 

@@ -5,19 +5,11 @@ namespace FlappyBird {
     export class Game extends Phaser.Game {
 
         constructor() {
-            super(288, 505, Phaser.AUTO, "content", {
-                preload() {
+            super(288, 505, Phaser.AUTO, "content", null);
 
-                },
+            this.state.add("play", PlayState, false);
 
-                create() {
-                    this.stage.backgroundColor  = "#00FF00";
-                },
-
-                update() {
-
-                }
-            });
+            this.state.start("play");
         }
     }
 

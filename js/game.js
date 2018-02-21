@@ -14,15 +14,10 @@ var FlappyBird;
     var Game = /** @class */ (function (_super) {
         __extends(Game, _super);
         function Game() {
-            return _super.call(this, 288, 505, Phaser.AUTO, "content", {
-                preload: function () {
-                },
-                create: function () {
-                    this.stage.backgroundColor = "#00FF00";
-                },
-                update: function () {
-                }
-            }) || this;
+            var _this = _super.call(this, 288, 505, Phaser.AUTO, "content", null) || this;
+            _this.state.add("play", FlappyBird.PlayState, false);
+            _this.state.start("play");
+            return _this;
         }
         return Game;
     }(Phaser.Game));
@@ -31,3 +26,24 @@ var FlappyBird;
 window.onload = function () {
     var game = new FlappyBird.Game();
 };
+var FlappyBird;
+(function (FlappyBird) {
+    var PlayState = /** @class */ (function (_super) {
+        __extends(PlayState, _super);
+        function PlayState() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        PlayState.prototype.preload = function () {
+            this.load.image("background", "assets/background.png");
+            this.load.spritesheet("bird", "assets/bird.png", 34, 24, 3);
+        };
+        PlayState.prototype.create = function () {
+            this.background = this.game.add.sprite(0, 0, "background");
+            this.bird = this.game.add.sprite(100, this.game.height / 2, "bird", 0);
+        };
+        PlayState.prototype.update = function () {
+        };
+        return PlayState;
+    }(Phaser.State));
+    FlappyBird.PlayState = PlayState;
+})(FlappyBird || (FlappyBird = {}));

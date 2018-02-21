@@ -5,6 +5,7 @@ namespace FlappyBird {
         background: Phaser.Sprite;
         bird: Bird;
         ground: Ground;
+        groundHitSound: Phaser.Sound;
 
         create() {
             // start the phaser arcade physics engine
@@ -22,7 +23,9 @@ namespace FlappyBird {
             this.game.add.existing(this.ground);
 
             // add mouse/touch controls
-            this.game.input.onDown.add(this.bird.flap, this.bird);            
+            this.game.input.onDown.add(this.bird.flap, this.bird);
+
+            this.groundHitSound = this.game.add.audio('groundHit');
         }
 
         update() {
@@ -32,7 +35,10 @@ namespace FlappyBird {
         }
 
         deathHandler(bird: Bird, enemy: Phaser.Sprite) {
-
+            if(enemy instanceof Ground && !this.bird.onGround) {
+                this.groundHitSound.play();
+                this.bird.onGround = true;
+            }
         }
 
     }

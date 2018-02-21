@@ -2,11 +2,18 @@ namespace FlappyBird {
 
     export class Bird extends Phaser.Sprite {
 
+        flapSound: Phaser.Sound;
+        onGround: Boolean;
+
         constructor(game: Phaser.Game, x: number, y: number, frame: number) {
             super(game, x, y, "bird", frame);
             this.anchor.setTo(0.5, 0.5);
             this.animations.add("flap");
             this.animations.play("flap", 12, true);
+
+            this.flapSound = this.game.add.audio('flap');
+
+            this.onGround = false;
 
             // enable physics on the bird
             // and disable gravity on the bird
@@ -19,6 +26,8 @@ namespace FlappyBird {
 
         flap() {
             if(this.alive) {
+                this.onGround = false;
+                this.flapSound.play();
                 //cause our bird to "jump" upward
                 this.body.velocity.y = -400;
                 // rotate the bird to -40 degrees

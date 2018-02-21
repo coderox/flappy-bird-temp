@@ -36,6 +36,8 @@ var FlappyBird;
             _this.anchor.setTo(0.5, 0.5);
             _this.animations.add("flap");
             _this.animations.play("flap", 12, true);
+            _this.flapSound = _this.game.add.audio('flap');
+            _this.onGround = false;
             // enable physics on the bird
             // and disable gravity on the bird
             // until the game is started
@@ -47,6 +49,8 @@ var FlappyBird;
         }
         Bird.prototype.flap = function () {
             if (this.alive) {
+                this.onGround = false;
+                this.flapSound.play();
                 //cause our bird to "jump" upward
                 this.body.velocity.y = -400;
                 // rotate the bird to -40 degrees
@@ -104,12 +108,17 @@ var FlappyBird;
             this.game.add.existing(this.ground);
             // add mouse/touch controls
             this.game.input.onDown.add(this.bird.flap, this.bird);
+            this.groundHitSound = this.game.add.audio('groundHit');
         };
         PlayState.prototype.update = function () {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
         };
         PlayState.prototype.deathHandler = function (bird, enemy) {
+            if (enemy instanceof FlappyBird.Ground && !this.bird.onGround) {
+                this.groundHitSound.play();
+                this.bird.onGround = true;
+            }
         };
         return PlayState;
     }(Phaser.State));

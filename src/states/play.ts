@@ -3,19 +3,20 @@ namespace FlappyBird {
     export class PlayState extends Phaser.State {
 
         background: Phaser.Sprite;
-        bird: Phaser.Sprite;
-        ground: Phaser.TileSprite;
+        bird: Bird;
+        ground: Ground;
 
         create() {
             this.background = this.game.add.sprite(0,0,"background");
             
-            this.bird = this.game.add.sprite(100, this.game.height/2, "bird", 0);
-            
-            this.bird.animations.add("flap");
-            this.bird.animations.play("flap", 12, true);
+            this.bird = new Bird(this.game, 100, this.game.height/2, 0);
+            this.game.add.existing(this.bird);
           
-            this.ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
-            this.ground.autoScroll(-200, 0);
+            this.ground = new Ground(this.game, 0, 400, 335, 112);
+            this.game.add.existing(this.ground);
+
+            // add mouse/touch controls
+            this.game.input.onDown.add(this.bird.flap, this.bird);            
         }
 
         update() {

@@ -29,6 +29,48 @@ window.onload = function () {
 };
 var FlappyBird;
 (function (FlappyBird) {
+    var Bird = /** @class */ (function (_super) {
+        __extends(Bird, _super);
+        function Bird(game, x, y, frame) {
+            var _this = _super.call(this, game, x, y, "bird", frame) || this;
+            _this.anchor.setTo(0.5, 0.5);
+            _this.animations.add("flap");
+            _this.animations.play("flap", 12, true);
+            return _this;
+        }
+        Bird.prototype.flap = function () {
+            if (this.alive) {
+                // rotate the bird to -40 degrees
+                this.game.add.tween(this).to({ angle: -40 }, 100).start();
+            }
+        };
+        Bird.prototype.update = function () {
+            // check to see if our angle is less than 90
+            // if it is rotate the bird towards the ground by 2.5 degrees
+            if (this.angle < 90 && this.alive) {
+                this.angle += 2.5;
+            }
+        };
+        return Bird;
+    }(Phaser.Sprite));
+    FlappyBird.Bird = Bird;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
+    var Ground = /** @class */ (function (_super) {
+        __extends(Ground, _super);
+        function Ground(game, x, y, width, height) {
+            var _this = _super.call(this, game, x, y, width, height, "ground") || this;
+            // start scrolling our ground
+            _this.autoScroll(-200, 0);
+            return _this;
+        }
+        return Ground;
+    }(Phaser.TileSprite));
+    FlappyBird.Ground = Ground;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
     var PlayState = /** @class */ (function (_super) {
         __extends(PlayState, _super);
         function PlayState() {
@@ -36,11 +78,12 @@ var FlappyBird;
         }
         PlayState.prototype.create = function () {
             this.background = this.game.add.sprite(0, 0, "background");
-            this.bird = this.game.add.sprite(100, this.game.height / 2, "bird", 0);
-            this.bird.animations.add("flap");
-            this.bird.animations.play("flap", 12, true);
-            this.ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
-            this.ground.autoScroll(-200, 0);
+            this.bird = new FlappyBird.Bird(this.game, 100, this.game.height / 2, 0);
+            this.game.add.existing(this.bird);
+            this.ground = new FlappyBird.Ground(this.game, 0, 400, 335, 112);
+            this.game.add.existing(this.ground);
+            // add mouse/touch controls
+            this.game.input.onDown.add(this.bird.flap, this.bird);
         };
         PlayState.prototype.update = function () {
         };

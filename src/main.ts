@@ -8,8 +8,9 @@ namespace FlappyBird {
             super(288, 505, Phaser.AUTO, "content", null);
 
             this.state.add("play", PlayState, false);
+            this.state.add("preload", PreloadState, false);
 
-            this.state.start("play");
+            this.state.start("preload");
         }
     }
 

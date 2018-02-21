@@ -4,15 +4,18 @@ namespace FlappyBird {
 
         background: Phaser.Sprite;
         bird: Phaser.Sprite;
-
-        preload() {
-            this.load.image("background", "assets/background.png");
-            this.load.spritesheet("bird", "assets/bird.png", 34, 24, 3);            
-        }
+        ground: Phaser.TileSprite;
 
         create() {
             this.background = this.game.add.sprite(0,0,"background");
+            
             this.bird = this.game.add.sprite(100, this.game.height/2, "bird", 0);
+            
+            this.bird.animations.add("flap");
+            this.bird.animations.play("flap", 12, true);
+          
+            this.ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
+            this.ground.autoScroll(-200, 0);
         }
 
         update() {

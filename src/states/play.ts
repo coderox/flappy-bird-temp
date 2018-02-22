@@ -2,9 +2,14 @@ namespace FlappyBird {
 
     export class PlayState extends Phaser.State {
 
-        background: Phaser.Sprite;
         bird: Bird;
         ground: Ground;
+
+        background: Phaser.Sprite;
+        pipes: Phaser.Group;
+
+        pipeGenerator: Phaser.TimerEvent;
+
         groundHitSound: Phaser.Sound;
 
         create() {
@@ -22,16 +27,23 @@ namespace FlappyBird {
             this.ground = new Ground(this.game, 0, 400, 335, 112);
             this.game.add.existing(this.ground);
 
+            // create and add a group to hold our pipeGroup prefabs
+            this.pipes = this.game.add.group();
+            this.pipeGenerator = null;
+
             // add mouse/touch controls
             this.game.input.onDown.add(this.bird.flap, this.bird);
 
             this.groundHitSound = this.game.add.audio('groundHit');
+
+            // add a timer
+            this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
+            this.pipeGenerator.timer.start();
         }
 
         update() {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
-
         }
 
         deathHandler(bird: Bird, enemy: Phaser.Sprite) {
@@ -41,5 +53,13 @@ namespace FlappyBird {
             }
         }
 
+        generatePipes() {
+            var pipeY = this.game.rnd.integerInRange(-100, 100);
+            var pipeGroup = this.pipes.getFirstExists(false);
+            if(!pipeGroup) {
+                pipeGroup = new PipeGroup(this.game, this.pipes);  
+            }
+            pipeGroup.reset(this.game.width, pipeY);
+        }
     }
 }

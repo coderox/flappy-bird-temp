@@ -91,6 +91,54 @@ var FlappyBird;
 })(FlappyBird || (FlappyBird = {}));
 var FlappyBird;
 (function (FlappyBird) {
+    var Pipe = /** @class */ (function (_super) {
+        __extends(Pipe, _super);
+        function Pipe(game, x, y, frame) {
+            var _this = _super.call(this, game, x, y, "pipe", frame) || this;
+            _this.anchor.setTo(0.5, 0.5);
+            _this.game.physics.arcade.enableBody(_this);
+            _this.body.allowGravity = false;
+            _this.body.immovable = true;
+            return _this;
+        }
+        return Pipe;
+    }(Phaser.Sprite));
+    FlappyBird.Pipe = Pipe;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
+    var PipeGroup = /** @class */ (function (_super) {
+        __extends(PipeGroup, _super);
+        function PipeGroup(game, parent) {
+            var _this = _super.call(this, game, parent) || this;
+            _this.topPipe = new FlappyBird.Pipe(_this.game, 0, 0, 0);
+            _this.bottomPipe = new FlappyBird.Pipe(_this.game, 0, 440, 1);
+            _this.add(_this.topPipe);
+            _this.add(_this.bottomPipe);
+            _this.setAll("body.velocity.x", -200);
+            return _this;
+        }
+        PipeGroup.prototype.update = function () {
+            if (!this.topPipe.inWorld) {
+                this.exists = false;
+            }
+        };
+        ;
+        PipeGroup.prototype.reset = function (x, y) {
+            this.topPipe.reset(0, 0);
+            this.bottomPipe.reset(0, 440);
+            this.x = x + 20;
+            this.y = y;
+            this.setAll("body.velocity.x", -200);
+            this.exists = true;
+        };
+        ;
+        return PipeGroup;
+    }(Phaser.Group));
+    FlappyBird.PipeGroup = PipeGroup;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
     var PlayState = /** @class */ (function (_super) {
         __extends(PlayState, _super);
         function PlayState() {
@@ -106,9 +154,16 @@ var FlappyBird;
             this.game.add.existing(this.bird);
             this.ground = new FlappyBird.Ground(this.game, 0, 400, 335, 112);
             this.game.add.existing(this.ground);
+            // create and add a group to hold our pipeGroup prefabs
+            this.pipes = this.game.add.group();
+            this.pipeGenerator = null;
+            this.pipeHitSound = this.game.add.audio('pipeHit');
             // add mouse/touch controls
             this.game.input.onDown.add(this.bird.flap, this.bird);
             this.groundHitSound = this.game.add.audio('groundHit');
+            // add a timer
+            this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
+            this.pipeGenerator.timer.start();
         };
         PlayState.prototype.update = function () {
             // enable collisions between the bird and the ground
@@ -119,6 +174,14 @@ var FlappyBird;
                 this.groundHitSound.play();
                 this.bird.onGround = true;
             }
+        };
+        PlayState.prototype.generatePipes = function () {
+            var pipeY = this.game.rnd.integerInRange(-100, 100);
+            var pipeGroup = this.pipes.getFirstExists(false);
+            if (!pipeGroup) {
+                pipeGroup = new FlappyBird.PipeGroup(this.game, this.pipes);
+            }
+            pipeGroup.reset(this.game.width, pipeY);
         };
         return PlayState;
     }(Phaser.State));

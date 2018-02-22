@@ -8,6 +8,7 @@ namespace FlappyBird {
 
         background: Phaser.Sprite;
         pipes: Phaser.Group;
+        instructionsGroup: Phaser.Group;
 
         pipeGenerator: Phaser.TimerEvent;
 
@@ -50,6 +51,12 @@ namespace FlappyBird {
             this.pipeHitSound = this.game.add.audio("pipeHit");
             this.scoreSound = this.game.add.audio("score");
 
+            this.instructionsGroup = this.game.add.group();
+            this.instructionsGroup.add(this.game.add.sprite(this.game.width/2, 100, "getReady"));
+            this.instructionsGroup.add(this.game.add.sprite(this.game.width/2, 325, "instructions"));
+            this.instructionsGroup.setAll("anchor.x", 0.5);
+            this.instructionsGroup.setAll("anchor.y", 0.5);
+
             this.gameover = false;
         }
 
@@ -60,6 +67,8 @@ namespace FlappyBird {
                 // add a timer
                 this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
                 this.pipeGenerator.timer.start();
+
+                this.instructionsGroup.destroy();
             }
         }
 
@@ -114,6 +123,10 @@ namespace FlappyBird {
                 pipeGroup = new PipeGroup(this.game, this.pipes);
             }
             pipeGroup.reset(this.game.width, pipeY);
+        }
+
+        render() {
+            //this.game.debug.body(this.bird);
         }
     }
 }

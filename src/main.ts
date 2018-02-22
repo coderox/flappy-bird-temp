@@ -10,6 +10,7 @@ namespace FlappyBird {
             this.state.add("play", PlayState, false);
             this.state.add("preload", PreloadState, false);
             this.state.add("boot", BootState, false);
+            this.state.add("menu", MenuState, false);
 
             this.state.start("boot");
         }

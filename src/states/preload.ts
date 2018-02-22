@@ -40,7 +40,7 @@ namespace FlappyBird {
 
         update() {
             if(this.ready) {
-                this.game.state.start("play");
+                this.game.state.start("menu");
             }
         }
         

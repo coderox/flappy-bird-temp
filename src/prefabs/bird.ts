@@ -21,6 +21,7 @@ namespace FlappyBird {
             // until the game is started
             // also make sure the collisions are using circular body
             this.game.physics.arcade.enableBody(this);
+            this.body.setCircle(13, 5, -2);
             this.body.allowGravity = false;
             this.body.collideWorldBounds = true;
 

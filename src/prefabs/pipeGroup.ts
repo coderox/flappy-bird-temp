@@ -30,5 +30,9 @@ namespace FlappyBird {
             this.setAll("body.velocity.x", -200);
             this.exists = true;
         };
+
+        stop() {
+            this.setAll("body.velocity.x", 0);
+        };
     }
 }

@@ -11,6 +11,9 @@ namespace FlappyBird {
         pipeGenerator: Phaser.TimerEvent;
 
         groundHitSound: Phaser.Sound;
+        pipeHitSound: Phaser.Sound;
+
+        gameover: Boolean;
 
         create() {
             // start the phaser arcade physics engine
@@ -21,35 +24,60 @@ namespace FlappyBird {
 
             this.background = this.game.add.sprite(0,0,"background");
 
+            // create and add a group to hold our pipeGroup prefabs
+            this.pipes = this.game.add.group();
+            this.pipeGenerator = null;
+
             this.bird = new Bird(this.game, 100, this.game.height/2, 0);
             this.game.add.existing(this.bird);
 
             this.ground = new Ground(this.game, 0, 400, 335, 112);
             this.game.add.existing(this.ground);
 
-            // create and add a group to hold our pipeGroup prefabs
-            this.pipes = this.game.add.group();
-            this.pipeGenerator = null;
-
             // add mouse/touch controls
+            this.game.input.onDown.addOnce(this.startGame, this);
             this.game.input.onDown.add(this.bird.flap, this.bird);
 
             this.groundHitSound = this.game.add.audio('groundHit');
+            this.pipeHitSound = this.game.add.audio('pipeHit');
+        }
 
-            // add a timer
-            this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
-            this.pipeGenerator.timer.start();
+        startGame() {
+            if(!this.bird.alive && !this.gameover) {
+                this.bird.body.allowGravity = true;
+                this.bird.alive = true;
+                // add a timer
+                this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
+                this.pipeGenerator.timer.start();
+            }
         }
 
         update() {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+
+            if(!this.gameover) {
+                // enable collisions between the bird and each group in the pipes group
+                this.pipes.forEach(function(pipeGroup) {
+                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+                }, this);
+            }
         }
 
         deathHandler(bird: Bird, enemy: Phaser.Sprite) {
             if(enemy instanceof Ground && !this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
+            } else if (enemy instanceof Pipe){
+                this.pipeHitSound.play();
+            }
+
+            if(!this.gameover) {
+                this.gameover = true;
+                this.bird.kill();
+                this.pipes.callAll("stop", null);
+                this.pipeGenerator.timer.stop();
+                this.ground.stopScroll();
             }
         }
 
@@ -57,7 +85,7 @@ namespace FlappyBird {
             var pipeY = this.game.rnd.integerInRange(-100, 100);
             var pipeGroup = this.pipes.getFirstExists(false);
             if(!pipeGroup) {
-                pipeGroup = new PipeGroup(this.game, this.pipes);  
+                pipeGroup = new PipeGroup(this.game, this.pipes);
             }
             pipeGroup.reset(this.game.width, pipeY);
         }

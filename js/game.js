@@ -37,14 +37,16 @@ var FlappyBird;
             _this.animations.add("flap");
             _this.animations.play("flap", 12, true);
             _this.flapSound = _this.game.add.audio('flap');
+            _this.alive = false;
             _this.onGround = false;
             // enable physics on the bird
             // and disable gravity on the bird
             // until the game is started
             // also make sure the collisions are using circular body
             _this.game.physics.arcade.enableBody(_this);
-            _this.body.allowGravity = true;
+            _this.body.allowGravity = false;
             _this.body.collideWorldBounds = true;
+            _this.events.onKilled.add(_this.onKilled, _this);
             return _this;
         }
         Bird.prototype.flap = function () {
@@ -63,6 +65,16 @@ var FlappyBird;
             if (this.angle < 90 && this.alive) {
                 this.angle += 2.5;
             }
+            if (!this.alive) {
+                this.body.velocity.x = 0;
+            }
+        };
+        Bird.prototype.onKilled = function () {
+            this.exists = true;
+            this.visible = true;
+            this.animations.stop();
+            var duration = 90 / this.y * 300;
+            this.game.add.tween(this).to({ angle: 90 }, duration).start();
         };
         return Bird;
     }(Phaser.Sprite));
@@ -133,6 +145,10 @@ var FlappyBird;
             this.exists = true;
         };
         ;
+        PipeGroup.prototype.stop = function () {
+            this.setAll("body.velocity.x", 0);
+        };
+        ;
         return PipeGroup;
     }(Phaser.Group));
     FlappyBird.PipeGroup = PipeGroup;
@@ -150,29 +166,52 @@ var FlappyBird;
             // give our world an initial gravity of 1200
             this.game.physics.arcade.gravity.y = 1200;
             this.background = this.game.add.sprite(0, 0, "background");
+            // create and add a group to hold our pipeGroup prefabs
+            this.pipes = this.game.add.group();
+            this.pipeGenerator = null;
             this.bird = new FlappyBird.Bird(this.game, 100, this.game.height / 2, 0);
             this.game.add.existing(this.bird);
             this.ground = new FlappyBird.Ground(this.game, 0, 400, 335, 112);
             this.game.add.existing(this.ground);
-            // create and add a group to hold our pipeGroup prefabs
-            this.pipes = this.game.add.group();
-            this.pipeGenerator = null;
-            this.pipeHitSound = this.game.add.audio('pipeHit');
             // add mouse/touch controls
+            this.game.input.onDown.addOnce(this.startGame, this);
             this.game.input.onDown.add(this.bird.flap, this.bird);
             this.groundHitSound = this.game.add.audio('groundHit');
-            // add a timer
-            this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
-            this.pipeGenerator.timer.start();
+            this.pipeHitSound = this.game.add.audio('pipeHit');
+        };
+        PlayState.prototype.startGame = function () {
+            if (!this.bird.alive && !this.gameover) {
+                this.bird.body.allowGravity = true;
+                this.bird.alive = true;
+                // add a timer
+                this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
+                this.pipeGenerator.timer.start();
+            }
         };
         PlayState.prototype.update = function () {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+            if (!this.gameover) {
+                // enable collisions between the bird and each group in the pipes group
+                this.pipes.forEach(function (pipeGroup) {
+                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+                }, this);
+            }
         };
         PlayState.prototype.deathHandler = function (bird, enemy) {
             if (enemy instanceof FlappyBird.Ground && !this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
+            }
+            else if (enemy instanceof FlappyBird.Pipe) {
+                this.pipeHitSound.play();
+            }
+            if (!this.gameover) {
+                this.gameover = true;
+                this.bird.kill();
+                this.pipes.callAll("stop", null);
+                this.pipeGenerator.timer.stop();
+                this.ground.stopScroll();
             }
         };
         PlayState.prototype.generatePipes = function () {

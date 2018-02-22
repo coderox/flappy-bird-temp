@@ -13,6 +13,7 @@ namespace FlappyBird {
 
             this.flapSound = this.game.add.audio('flap');
 
+            this.alive = false;
             this.onGround = false;
 
             // enable physics on the bird
@@ -20,8 +21,10 @@ namespace FlappyBird {
             // until the game is started
             // also make sure the collisions are using circular body
             this.game.physics.arcade.enableBody(this);
-            this.body.allowGravity = true;
+            this.body.allowGravity = false;
             this.body.collideWorldBounds = true;
+
+            this.events.onKilled.add(this.onKilled, this);
         }
 
         flap() {
@@ -40,7 +43,19 @@ namespace FlappyBird {
             // if it is rotate the bird towards the ground by 2.5 degrees
             if(this.angle < 90 && this.alive) {
                 this.angle += 2.5;
+            }
+
+            if(!this.alive) {
+                this.body.velocity.x = 0;
             } 
+        }
+
+        onKilled() {
+            this.exists = true;
+            this.visible = true;
+            this.animations.stop();
+            var duration = 90 / this.y * 300;
+            this.game.add.tween(this).to({angle: 90}, duration).start();
         }
     }
 }

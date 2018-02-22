@@ -128,6 +128,7 @@ var FlappyBird;
             _this.add(_this.topPipe);
             _this.add(_this.bottomPipe);
             _this.setAll("body.velocity.x", -200);
+            _this.hasScored = false;
             return _this;
         }
         PipeGroup.prototype.update = function () {
@@ -142,6 +143,7 @@ var FlappyBird;
             this.x = x + 20;
             this.y = y;
             this.setAll("body.velocity.x", -200);
+            this.hasScored = false;
             this.exists = true;
         };
         ;
@@ -152,6 +154,61 @@ var FlappyBird;
         return PipeGroup;
     }(Phaser.Group));
     FlappyBird.PipeGroup = PipeGroup;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
+    var ScoreBoard = /** @class */ (function (_super) {
+        __extends(ScoreBoard, _super);
+        function ScoreBoard(game) {
+            var _this = _super.call(this, game) || this;
+            var gameover = _this.create(_this.game.width / 2, 100, "gameover");
+            gameover.anchor.setTo(0.5, 0.5);
+            _this.scoreboard = _this.create(_this.game.width / 2, 200, "scoreboard");
+            _this.scoreboard.anchor.setTo(0.5, 0.5);
+            _this.scoreText = _this.game.add.bitmapText(_this.scoreboard.width, 180, "flappyfont", "", 18);
+            _this.add(_this.scoreText);
+            _this.bestText = _this.game.add.bitmapText(_this.scoreboard.width, 230, "flappyfont", "", 18);
+            _this.add(_this.bestText);
+            // add our start button with a callback
+            _this.startButton = _this.game.add.button(_this.game.width / 2, 300, "startButton", _this.startClick, _this);
+            _this.startButton.anchor.setTo(0.5, 0.5);
+            _this.add(_this.startButton);
+            _this.y = _this.game.height;
+            _this.x = 0;
+            return _this;
+        }
+        ScoreBoard.prototype.show = function (score) {
+            var coin, bestScore;
+            this.scoreText.setText(score.toString());
+            if (localStorage) {
+                bestScore = localStorage.getItem("bestScore");
+                if (!bestScore || bestScore < score) {
+                    bestScore = score;
+                    localStorage.setItem("bestScore", bestScore);
+                }
+            }
+            else {
+                bestScore = "N/A";
+            }
+            this.bestText.setText(bestScore.toString());
+            if (score >= 10 && score < 20) {
+                coin = this.game.add.sprite(-65, 7, "medals", 1);
+            }
+            else if (score >= 20) {
+                coin = this.game.add.sprite(-65, 7, "medals", 0);
+            }
+            this.game.add.tween(this).to({ y: 0 }, 1000, Phaser.Easing.Bounce.Out, true);
+            if (coin) {
+                coin.anchor.setTo(0.5, 0.5);
+                this.scoreboard.addChild(coin);
+            }
+        };
+        ScoreBoard.prototype.startClick = function () {
+            this.game.state.start("play");
+        };
+        return ScoreBoard;
+    }(Phaser.Group));
+    FlappyBird.ScoreBoard = ScoreBoard;
 })(FlappyBird || (FlappyBird = {}));
 var FlappyBird;
 (function (FlappyBird) {
@@ -176,8 +233,12 @@ var FlappyBird;
             // add mouse/touch controls
             this.game.input.onDown.addOnce(this.startGame, this);
             this.game.input.onDown.add(this.bird.flap, this.bird);
-            this.groundHitSound = this.game.add.audio('groundHit');
-            this.pipeHitSound = this.game.add.audio('pipeHit');
+            this.score = 0;
+            this.scoreText = this.game.add.bitmapText(this.game.width / 2, 10, "flappyfont", this.score.toString(), 24);
+            this.groundHitSound = this.game.add.audio("groundHit");
+            this.pipeHitSound = this.game.add.audio("pipeHit");
+            this.scoreSound = this.game.add.audio("score");
+            this.gameover = false;
         };
         PlayState.prototype.startGame = function () {
             if (!this.bird.alive && !this.gameover) {
@@ -188,12 +249,21 @@ var FlappyBird;
                 this.pipeGenerator.timer.start();
             }
         };
+        PlayState.prototype.checkScore = function (pipeGroup) {
+            if (pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
+                pipeGroup.hasScored = true;
+                this.score++;
+                this.scoreText.setText(this.score.toString());
+                this.scoreSound.play();
+            }
+        };
         PlayState.prototype.update = function () {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
             if (!this.gameover) {
                 // enable collisions between the bird and each group in the pipes group
                 this.pipes.forEach(function (pipeGroup) {
+                    this.checkScore(pipeGroup);
                     this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
                 }, this);
             }
@@ -202,6 +272,9 @@ var FlappyBird;
             if (enemy instanceof FlappyBird.Ground && !this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
+                this.scoreboard = new FlappyBird.ScoreBoard(this.game);
+                this.game.add.existing(this.scoreboard);
+                this.scoreboard.show(this.score);
             }
             else if (enemy instanceof FlappyBird.Pipe) {
                 this.pipeHitSound.play();

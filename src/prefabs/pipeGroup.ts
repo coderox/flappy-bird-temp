@@ -4,6 +4,7 @@ namespace FlappyBird {
 
         topPipe: Pipe;
         bottomPipe: Pipe;
+        hasScored: boolean;
 
         constructor(game: Phaser.Game, parent: PIXI.DisplayObjectContainer ) {
             super(game, parent);
@@ -14,6 +15,8 @@ namespace FlappyBird {
             this.add(this.bottomPipe);
 
             this.setAll("body.velocity.x", -200);
+
+            this.hasScored = false;
         }
 
         update() {
@@ -28,6 +31,7 @@ namespace FlappyBird {
             this.x = x + 20;
             this.y = y;
             this.setAll("body.velocity.x", -200);
+            this.hasScored = false;
             this.exists = true;
         };
 

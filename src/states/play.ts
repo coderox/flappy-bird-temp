@@ -4,6 +4,7 @@ namespace FlappyBird {
 
         bird: Bird;
         ground: Ground;
+        scoreboard: ScoreBoard;
 
         background: Phaser.Sprite;
         pipes: Phaser.Group;
@@ -12,8 +13,12 @@ namespace FlappyBird {
 
         groundHitSound: Phaser.Sound;
         pipeHitSound: Phaser.Sound;
+        scoreSound: Phaser.Sound;
 
-        gameover: Boolean;
+        scoreText: Phaser.BitmapText;
+
+        gameover: boolean;
+        score: number;
 
         create() {
             // start the phaser arcade physics engine
@@ -38,8 +43,14 @@ namespace FlappyBird {
             this.game.input.onDown.addOnce(this.startGame, this);
             this.game.input.onDown.add(this.bird.flap, this.bird);
 
-            this.groundHitSound = this.game.add.audio('groundHit');
-            this.pipeHitSound = this.game.add.audio('pipeHit');
+            this.score = 0;
+            this.scoreText = this.game.add.bitmapText(this.game.width/2, 10, "flappyfont", this.score.toString(), 24);
+
+            this.groundHitSound = this.game.add.audio("groundHit");
+            this.pipeHitSound = this.game.add.audio("pipeHit");
+            this.scoreSound = this.game.add.audio("score");
+
+            this.gameover = false;
         }
 
         startGame() {
@@ -52,6 +63,15 @@ namespace FlappyBird {
             }
         }
 
+        checkScore(pipeGroup: PipeGroup) {
+            if(pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
+                pipeGroup.hasScored = true;
+                this.score++;
+                this.scoreText.setText(this.score.toString());
+                this.scoreSound.play();
+            }
+        }
+
         update() {
             // enable collisions between the bird and the ground
             this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
@@ -59,6 +79,7 @@ namespace FlappyBird {
             if(!this.gameover) {
                 // enable collisions between the bird and each group in the pipes group
                 this.pipes.forEach(function(pipeGroup) {
+                    this.checkScore(pipeGroup);
                     this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
                 }, this);
             }
@@ -68,6 +89,11 @@ namespace FlappyBird {
             if(enemy instanceof Ground && !this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
+
+                this.scoreboard = new ScoreBoard(this.game);
+                this.game.add.existing(this.scoreboard);
+                this.scoreboard.show(this.score);
+
             } else if (enemy instanceof Pipe){
                 this.pipeHitSound.play();
             }

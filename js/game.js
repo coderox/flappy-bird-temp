@@ -17,7 +17,9 @@ var FlappyBird;
             var _this = _super.call(this, 288, 505, Phaser.AUTO, "content", null) || this;
             _this.state.add("play", FlappyBird.PlayState, false);
             _this.state.add("preload", FlappyBird.PreloadState, false);
-            _this.state.start("preload");
+            _this.state.add("boot", FlappyBird.BootState, false);
+            _this.state.add("menu", FlappyBird.MenuState, false);
+            _this.state.start("boot");
             return _this;
         }
         return Game;
@@ -44,6 +46,7 @@ var FlappyBird;
             // until the game is started
             // also make sure the collisions are using circular body
             _this.game.physics.arcade.enableBody(_this);
+            _this.body.setCircle(13, 5, -2);
             _this.body.allowGravity = false;
             _this.body.collideWorldBounds = true;
             _this.events.onKilled.add(_this.onKilled, _this);
@@ -100,6 +103,30 @@ var FlappyBird;
         return Ground;
     }(Phaser.TileSprite));
     FlappyBird.Ground = Ground;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
+    var Panorama = /** @class */ (function (_super) {
+        __extends(Panorama, _super);
+        function Panorama(game) {
+            var _this = _super.call(this, game) || this;
+            var clouds = _this.game.add.tileSprite(0, 300, 352, 100, "clouds");
+            clouds.autoScroll(-20, 0);
+            _this.add(clouds);
+            var cityscape = _this.game.add.tileSprite(0, 330, 300, 43, "cityscape");
+            cityscape.autoScroll(-30, 0);
+            _this.add(cityscape);
+            var trees = _this.game.add.tileSprite(0, 360, 415, 144, "trees");
+            trees.autoScroll(-60, 0);
+            _this.add(trees);
+            return _this;
+        }
+        Panorama.prototype.stop = function () {
+            this.callAll("stopScroll", null);
+        };
+        return Panorama;
+    }(Phaser.Group));
+    FlappyBird.Panorama = Panorama;
 })(FlappyBird || (FlappyBird = {}));
 var FlappyBird;
 (function (FlappyBird) {
@@ -212,6 +239,57 @@ var FlappyBird;
 })(FlappyBird || (FlappyBird = {}));
 var FlappyBird;
 (function (FlappyBird) {
+    var BootState = /** @class */ (function (_super) {
+        __extends(BootState, _super);
+        function BootState() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        BootState.prototype.preload = function () {
+            this.load.image("preloader", "assets/preloader.gif");
+        };
+        BootState.prototype.create = function () {
+            this.game.input.maxPointers = 1;
+            this.game.state.start("preload");
+        };
+        return BootState;
+    }(Phaser.State));
+    FlappyBird.BootState = BootState;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
+    var MenuState = /** @class */ (function (_super) {
+        __extends(MenuState, _super);
+        function MenuState() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        MenuState.prototype.create = function () {
+            this.game.add.sprite(0, 0, "sky");
+            var panorama = new FlappyBird.Panorama(this.game);
+            this.add.existing(panorama);
+            var ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
+            ground.autoScroll(-200, 0);
+            var titleGroup = this.game.add.group();
+            var title = this.add.sprite(0, 0, "title");
+            titleGroup.add(title);
+            var bird = this.add.sprite(200, 5, "bird");
+            titleGroup.add(bird);
+            bird.animations.add("flap");
+            bird.animations.play("flap", 12, true);
+            titleGroup.x = 30;
+            titleGroup.y = 100;
+            this.game.add.tween(titleGroup).to({ y: 115 }, 350, Phaser.Easing.Linear.None, true, 0, 1000, true);
+            var startButton = this.game.add.button(this.game.width / 2, 300, "startButton", this.startClick, this);
+            startButton.anchor.setTo(0.5, 0.5);
+        };
+        MenuState.prototype.startClick = function () {
+            this.game.state.start("play");
+        };
+        return MenuState;
+    }(Phaser.State));
+    FlappyBird.MenuState = MenuState;
+})(FlappyBird || (FlappyBird = {}));
+var FlappyBird;
+(function (FlappyBird) {
     var PlayState = /** @class */ (function (_super) {
         __extends(PlayState, _super);
         function PlayState() {
@@ -222,7 +300,9 @@ var FlappyBird;
             this.game.physics.startSystem(Phaser.Physics.ARCADE);
             // give our world an initial gravity of 1200
             this.game.physics.arcade.gravity.y = 1200;
-            this.background = this.game.add.sprite(0, 0, "background");
+            this.background = this.game.add.sprite(0, 0, "sky");
+            this.panorama = new FlappyBird.Panorama(this.game);
+            this.game.add.existing(this.panorama);
             // create and add a group to hold our pipeGroup prefabs
             this.pipes = this.game.add.group();
             this.pipeGenerator = null;
@@ -238,6 +318,11 @@ var FlappyBird;
             this.groundHitSound = this.game.add.audio("groundHit");
             this.pipeHitSound = this.game.add.audio("pipeHit");
             this.scoreSound = this.game.add.audio("score");
+            this.instructionsGroup = this.game.add.group();
+            this.instructionsGroup.add(this.game.add.sprite(this.game.width / 2, 100, "getReady"));
+            this.instructionsGroup.add(this.game.add.sprite(this.game.width / 2, 325, "instructions"));
+            this.instructionsGroup.setAll("anchor.x", 0.5);
+            this.instructionsGroup.setAll("anchor.y", 0.5);
             this.gameover = false;
         };
         PlayState.prototype.startGame = function () {
@@ -247,6 +332,7 @@ var FlappyBird;
                 // add a timer
                 this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
                 this.pipeGenerator.timer.start();
+                this.instructionsGroup.destroy();
             }
         };
         PlayState.prototype.checkScore = function (pipeGroup) {
@@ -285,6 +371,7 @@ var FlappyBird;
                 this.pipes.callAll("stop", null);
                 this.pipeGenerator.timer.stop();
                 this.ground.stopScroll();
+                this.panorama.stop();
             }
         };
         PlayState.prototype.generatePipes = function () {
@@ -294,6 +381,9 @@ var FlappyBird;
                 pipeGroup = new FlappyBird.PipeGroup(this.game, this.pipes);
             }
             pipeGroup.reset(this.game.width, pipeY);
+        };
+        PlayState.prototype.render = function () {
+            //this.game.debug.body(this.bird);
         };
         return PlayState;
     }(Phaser.State));
@@ -307,9 +397,12 @@ var FlappyBird;
             return _super !== null && _super.apply(this, arguments) || this;
         }
         PreloadState.prototype.preload = function () {
+            var preloadBar = this.add.sprite(this.stage.width / 2, this.stage.height / 2, "preloader");
+            preloadBar.anchor.setTo(0.5, 0.5);
             this.load.onLoadComplete.addOnce(this.onLoadComplete, this);
+            this.load.setPreloadSprite(preloadBar);
             // images
-            this.load.image("background", "assets/background.png");
+            this.load.image("sky", "assets/sky.png");
             this.load.image("ground", "assets/ground.png");
             this.load.image("title", "assets/title.png");
             this.load.image("startButton", "assets/start-button.png");
@@ -318,6 +411,9 @@ var FlappyBird;
             this.load.image("scoreboard", "assets/scoreboard.png");
             this.load.image("gameover", "assets/gameover.png");
             this.load.image("particle", "assets/particle.png");
+            this.load.image("trees", "assets/trees.png");
+            this.load.image("clouds", "assets/clouds.png");
+            this.load.image("cityscape", "assets/cityscape.png");
             // sprite sheets
             this.load.spritesheet("medals", "assets/medals.png", 44, 46, 2);
             this.load.spritesheet("bird", "assets/bird.png", 34, 24, 3);
@@ -333,7 +429,7 @@ var FlappyBird;
         };
         PreloadState.prototype.update = function () {
             if (this.ready) {
-                this.game.state.start("play");
+                this.game.state.start("menu");
             }
         };
         PreloadState.prototype.onLoadComplete = function () {

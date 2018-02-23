@@ -3,8 +3,11 @@ namespace FlappyBird {
     export class MenuState extends Phaser.State {
 
         create() {
-            this.game.add.sprite(0, 0, "background");
+            this.game.add.sprite(0, 0, "sky");
 
+            var panorama = new Panorama(this.game);
+            this.add.existing(panorama);
+            
             var ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
             ground.autoScroll(-200, 0);
 

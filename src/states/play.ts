@@ -4,6 +4,7 @@ namespace FlappyBird {
 
         bird: Bird;
         ground: Ground;
+        panorama: Panorama;
         scoreboard: ScoreBoard;
 
         background: Phaser.Sprite;
@@ -28,9 +29,12 @@ namespace FlappyBird {
             // give our world an initial gravity of 1200
             this.game.physics.arcade.gravity.y = 1200;
 
-            this.background = this.game.add.sprite(0,0,"background");
+            this.background = this.game.add.sprite(0,0,"sky");
 
-            // create and add a group to hold our pipeGroup prefabs
+            this.panorama = new Panorama(this.game);
+            this.game.add.existing(this.panorama)
+
+                // create and add a group to hold our pipeGroup prefabs
             this.pipes = this.game.add.group();
             this.pipeGenerator = null;
 
@@ -113,6 +117,7 @@ namespace FlappyBird {
                 this.pipes.callAll("stop", null);
                 this.pipeGenerator.timer.stop();
                 this.ground.stopScroll();
+                this.panorama.stop();
             }
         }
 

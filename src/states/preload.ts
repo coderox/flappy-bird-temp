@@ -12,7 +12,7 @@ namespace FlappyBird {
             this.load.setPreloadSprite(preloadBar);
 
             // images
-            this.load.image("background", "assets/background.png");
+            this.load.image("sky", "assets/sky.png");
             this.load.image("ground", "assets/ground.png");
             this.load.image("title", "assets/title.png");
             this.load.image("startButton", "assets/start-button.png");
@@ -21,6 +21,9 @@ namespace FlappyBird {
             this.load.image("scoreboard", "assets/scoreboard.png");
             this.load.image("gameover", "assets/gameover.png");
             this.load.image("particle", "assets/particle.png");
+            this.load.image("trees", "assets/trees.png");
+            this.load.image("clouds", "assets/clouds.png");
+            this.load.image("cityscape", "assets/cityscape.png");
         
             // sprite sheets
             this.load.spritesheet("medals", "assets/medals.png",44, 46, 2);

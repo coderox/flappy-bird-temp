@@ -87,30 +87,35 @@ namespace FlappyBird {
 
         update() {
             // enable collisions between the bird and the ground
-            this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+            this.game.physics.arcade.collide(this.bird, this.ground, this.birdGroundCollisionHandler, null, this);
 
             if(!this.gameover) {
                 // enable collisions between the bird and each group in the pipes group
                 this.pipes.forEach(function(pipeGroup) {
                     this.checkScore(pipeGroup);
-                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.birdPipeCollisionHandler, null, this);
                 }, this);
             }
         }
 
-        deathHandler(bird: Bird, enemy: Phaser.Sprite) {
-            if(enemy instanceof Ground && !this.bird.onGround) {
+        birdGroundCollisionHandler(bird: Bird, ground: Ground) {
+            if(!this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
 
                 this.scoreboard = new ScoreBoard(this.game);
                 this.game.add.existing(this.scoreboard);
                 this.scoreboard.show(this.score);
-
-            } else if (enemy instanceof Pipe){
-                this.pipeHitSound.play();
             }
+            this.checkGameOver();
+        }
 
+        birdPipeCollisionHandler(bird, pipe: Pipe){
+            this.pipeHitSound.play();
+            this.checkGameOver();
+        }
+
+        checkGameOver() {
             if(!this.gameover) {
                 this.gameover = true;
                 this.bird.kill();

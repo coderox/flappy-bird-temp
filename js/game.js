@@ -345,26 +345,30 @@ var FlappyBird;
         };
         PlayState.prototype.update = function () {
             // enable collisions between the bird and the ground
-            this.game.physics.arcade.collide(this.bird, this.ground, this.deathHandler, null, this);
+            this.game.physics.arcade.collide(this.bird, this.ground, this.birdGroundCollisionHandler, null, this);
             if (!this.gameover) {
                 // enable collisions between the bird and each group in the pipes group
                 this.pipes.forEach(function (pipeGroup) {
                     this.checkScore(pipeGroup);
-                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.deathHandler, null, this);
+                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.birdPipeCollisionHandler, null, this);
                 }, this);
             }
         };
-        PlayState.prototype.deathHandler = function (bird, enemy) {
-            if (enemy instanceof FlappyBird.Ground && !this.bird.onGround) {
+        PlayState.prototype.birdGroundCollisionHandler = function (bird, ground) {
+            if (!this.bird.onGround) {
                 this.groundHitSound.play();
                 this.bird.onGround = true;
                 this.scoreboard = new FlappyBird.ScoreBoard(this.game);
                 this.game.add.existing(this.scoreboard);
                 this.scoreboard.show(this.score);
             }
-            else if (enemy instanceof FlappyBird.Pipe) {
-                this.pipeHitSound.play();
-            }
+            this.checkGameOver();
+        };
+        PlayState.prototype.birdPipeCollisionHandler = function (bird, pipe) {
+            this.pipeHitSound.play();
+            this.checkGameOver();
+        };
+        PlayState.prototype.checkGameOver = function () {
             if (!this.gameover) {
                 this.gameover = true;
                 this.bird.kill();

@@ -39,12 +39,12 @@ namespace FlappyBird {
             if(localStorage) {
                 let existingScore = localStorage.getItem("bestScore");
                 if(existingScore) {
-                    bestScore = parseInt(existingScore);
-                    if(!bestScore || bestScore < score) {
-                        bestScore = score;
-                        localStorage.setItem("bestScore", bestScore.toString());
-                    }
+                    bestScore = parseInt(existingScore);                    
                 } 
+                if(!bestScore || bestScore < score) {
+                    bestScore = score;
+                    localStorage.setItem("bestScore", bestScore.toString());
+                }
             }
 
             this.bestText.setText(bestScore.toString());

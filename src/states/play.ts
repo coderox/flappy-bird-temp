@@ -2,25 +2,25 @@ namespace FlappyBird {
 
     export class PlayState extends Phaser.State {
 
-        bird: Bird;
-        ground: Ground;
-        panorama: Panorama;
-        scoreboard: ScoreBoard;
+        bird: Bird | undefined;
+        ground: Ground | undefined;
+        panorama: Panorama | undefined;
+        scoreboard: ScoreBoard | undefined;
 
-        background: Phaser.Sprite;
-        pipes: Phaser.Group;
-        instructionsGroup: Phaser.Group;
+        background: Phaser.Sprite | undefined;
+        pipes: Phaser.Group | undefined;
+        instructionsGroup: Phaser.Group | undefined;
 
-        pipeGenerator: Phaser.TimerEvent;
+        pipeGenerator: Phaser.TimerEvent | undefined;
 
-        groundHitSound: Phaser.Sound;
-        pipeHitSound: Phaser.Sound;
-        scoreSound: Phaser.Sound;
+        groundHitSound: Phaser.Sound | undefined;
+        pipeHitSound: Phaser.Sound | undefined;
+        scoreSound: Phaser.Sound | undefined;
 
-        scoreText: Phaser.BitmapText;
+        scoreText: Phaser.BitmapText | undefined;
 
-        gameover: boolean;
-        score: number;
+        gameover: boolean = false;
+        score: number = 0;
 
         create() {
             // start the phaser arcade physics engine
@@ -36,7 +36,7 @@ namespace FlappyBird {
 
                 // create and add a group to hold our pipeGroup prefabs
             this.pipes = this.game.add.group();
-            this.pipeGenerator = null;
+            this.pipeGenerator = undefined;
 
             this.bird = new Bird(this.game, 100, this.game.height/2, 0);
             this.game.add.existing(this.bird);
@@ -65,42 +65,46 @@ namespace FlappyBird {
         }
 
         startGame() {
-            if(!this.bird.alive && !this.gameover) {
+            if(this.bird && !this.bird.alive && !this.gameover) {
                 this.bird.body.allowGravity = true;
                 this.bird.alive = true;
                 // add a timer
                 this.pipeGenerator = this.game.time.events.loop(Phaser.Timer.SECOND * 1.25, this.generatePipes, this);
                 this.pipeGenerator.timer.start();
 
-                this.instructionsGroup.destroy();
+                if(this.instructionsGroup)
+                    this.instructionsGroup.destroy();
             }
         }
 
         checkScore(pipeGroup: PipeGroup) {
-            if(pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
+            if(this.bird && pipeGroup.exists && !pipeGroup.hasScored && pipeGroup.topPipe.world.x <= this.bird.world.x) {
                 pipeGroup.hasScored = true;
                 this.score++;
-                this.scoreText.setText(this.score.toString());
-                this.scoreSound.play();
+                if(this.scoreText)
+                    this.scoreText.setText(this.score.toString());
+                if(this.scoreSound)
+                    this.scoreSound.play();
             }
         }
 
         update() {
             // enable collisions between the bird and the ground
-            this.game.physics.arcade.collide(this.bird, this.ground, this.birdGroundCollisionHandler, null, this);
+            this.game.physics.arcade.collide(this.bird, this.ground, this.birdGroundCollisionHandler, undefined, this);
 
-            if(!this.gameover) {
+            if(!this.gameover && this.pipes) {
                 // enable collisions between the bird and each group in the pipes group
-                this.pipes.forEach(function(pipeGroup) {
+                this.pipes.forEach((pipeGroup : PipeGroup) => {
                     this.checkScore(pipeGroup);
-                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.birdPipeCollisionHandler, null, this);
+                    this.game.physics.arcade.collide(this.bird, pipeGroup, this.birdPipeCollisionHandler, undefined, this);
                 }, this);
             }
         }
 
         birdGroundCollisionHandler(bird: Bird, ground: Ground) {
-            if(!this.bird.onGround) {
-                this.groundHitSound.play();
+            if(this.bird && !this.bird.onGround) {
+                if(this.groundHitSound)
+                    this.groundHitSound.play();
                 this.bird.onGround = true;
 
                 this.scoreboard = new ScoreBoard(this.game);
@@ -110,13 +114,14 @@ namespace FlappyBird {
             this.checkGameOver();
         }
 
-        birdPipeCollisionHandler(bird, pipe: Pipe){
-            this.pipeHitSound.play();
+        birdPipeCollisionHandler(bird : Bird, pipe: Pipe){
+            if(this.pipeHitSound)
+                this.pipeHitSound.play();
             this.checkGameOver();
         }
 
         checkGameOver() {
-            if(!this.gameover) {
+            if(!this.gameover && this.bird && this.pipes && this.pipeGenerator && this.ground && this.panorama) {
                 this.gameover = true;
                 this.bird.kill();
                 this.pipes.callAll("stop", null);
@@ -127,12 +132,15 @@ namespace FlappyBird {
         }
 
         generatePipes() {
-            var pipeY = this.game.rnd.integerInRange(-100, 100);
-            var pipeGroup = this.pipes.getFirstExists(false);
-            if(!pipeGroup) {
-                pipeGroup = new PipeGroup(this.game, this.pipes);
+            let pipeY = this.game.rnd.integerInRange(-100, 100);
+            
+            if(this.pipes) {
+                let pipeGroup = this.pipes.getFirstExists(false);
+                if(!pipeGroup) {
+                    pipeGroup = new PipeGroup(this.game, this.pipes);
+                }
+                pipeGroup.reset(this.game.width, pipeY);
             }
-            pipeGroup.reset(this.game.width, pipeY);
         }
 
         render() {

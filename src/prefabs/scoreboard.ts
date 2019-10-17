@@ -1,5 +1,3 @@
-import { Sprite } from "phaser-ce";
-
 namespace FlappyBird {
 
     export class ScoreBoard extends Phaser.Group {
@@ -35,7 +33,7 @@ namespace FlappyBird {
         }
 
         show(score: number) {
-            let coin: Sprite | undefined;
+            let coin: Phaser.Sprite | undefined;
             let bestScore: number = 0;
             this.scoreText.setText(score.toString());
             if(localStorage) {

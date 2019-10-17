@@ -1,4 +1,4 @@
-/// <reference path="../phaser-ce/typescript/phaser.d.ts"/>
+/// <reference path="../phaser/types/phaser.d.ts"/>
 
 namespace FlappyBird {
 

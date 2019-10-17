@@ -2,10 +2,10 @@ namespace FlappyBird {
 
     export class PreloadState extends Phaser.State {
 
-        ready: Boolean = false;
+        ready: boolean = false;
 
         preload() {
-            var preloadBar = this.add.sprite(this.stage.width/2,this.stage.height/2, "preloader");
+            let preloadBar = this.add.sprite(this.stage.width/2,this.stage.height/2, "preloader");
             preloadBar.anchor.setTo(0.5, 0.5);
 
             this.load.onLoadComplete.addOnce(this.onLoadComplete, this);

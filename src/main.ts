@@ -19,5 +19,5 @@ namespace FlappyBird {
 }
 
 window.onload = () => {
-    var game = new FlappyBird.Game();
+    let game = new FlappyBird.Game();
 }

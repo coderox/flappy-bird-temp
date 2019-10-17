@@ -55,7 +55,7 @@ namespace FlappyBird {
             this.exists = true;
             this.visible = true;
             this.animations.stop();
-            var duration = 90 / this.y * 300;
+            let duration = 90 / this.y * 300;
             this.game.add.tween(this).to({angle: 90}, duration).start();
         }
     }

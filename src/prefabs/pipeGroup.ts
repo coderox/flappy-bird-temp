@@ -1,6 +1,6 @@
 namespace FlappyBird {
 
-    export class PipeGroup extends Phaser.Group {
+    export class PipeGroup extends Phaser.GameObjects.Group {
 
         topPipe: Pipe;
         bottomPipe: Pipe;

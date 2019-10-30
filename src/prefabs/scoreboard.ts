@@ -1,6 +1,6 @@
 namespace FlappyBird {
 
-    export class ScoreBoard extends Phaser.Group {
+    export class ScoreBoard extends Phaser.GameObjects.Group {
 
         scoreText: Phaser.BitmapText;
         bestText: Phaser.BitmapText;

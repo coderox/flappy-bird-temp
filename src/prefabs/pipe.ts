@@ -1,6 +1,6 @@
 namespace FlappyBird {
 
-    export class Pipe extends Phaser.Sprite {
+    export class Pipe extends Phaser.GameObjects.Sprite {
 
         constructor(game: Phaser.Game, x: number, y: number, frame: number){
             super(game, x, y, "pipe", frame);

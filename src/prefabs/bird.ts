@@ -1,8 +1,8 @@
 namespace FlappyBird {
 
-    export class Bird extends Phaser.Sprite {
+    export class Bird extends Phaser.GameObjects.Sprite {
 
-        flapSound: Phaser.Sound;
+        flapSound: Phaser.Sound.BaseSound;
         onGround: Boolean;
 
         constructor(game: Phaser.Game, x: number, y: number, frame: number) {

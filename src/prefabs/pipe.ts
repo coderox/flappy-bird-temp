@@ -2,13 +2,13 @@ namespace FlappyBird {
 
     export class Pipe extends Phaser.GameObjects.Sprite {
 
-        constructor(game: Phaser.Game, x: number, y: number, frame: number){
-            super(game, x, y, "pipe", frame);
-            this.anchor.setTo(0.5, 0.5);
-            this.game.physics.arcade.enableBody(this);
+        constructor(scene: Phaser.Scene, x: number, y: number, frame: number){
+            super(scene, x, y, "pipe", frame);
+            this.setOrigin(0.5, 0.5);
+            //this.scene.physics.arcade.enableBody(this);
 
-            this.body.allowGravity = false;
-            this.body.immovable = true;
+            //this.body.allowGravity = false;
+            //this.body.immovable = true;
         }
     }
 }

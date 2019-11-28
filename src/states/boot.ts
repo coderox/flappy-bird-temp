@@ -1,14 +1,17 @@
 namespace FlappyBird {
 
-    export class BootState extends Phaser.State {
+    export class BootScene extends Phaser.Scene {
+
+        constructor() {
+            super("boot");
+        }
 
         preload() {
             this.load.image("preloader", "assets/preloader.gif");
         }
 
         create() {
-            this.game.input.maxPointers = 1;
-            this.game.state.start("preload");
+            this.scene.start("preload");
         }
     }
 }

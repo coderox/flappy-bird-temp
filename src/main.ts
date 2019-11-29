@@ -10,16 +10,14 @@ namespace FlappyBird {
                 width: 288,
                 height: 505,
                 parent: 'content',
-                scene: [ BootScene ]
+                physics: { 
+                    default: 'arcade',
+                    arcade: {
+                        y: 1200,
+                        debug: true,
+                    }},
+                scene: [ BootScene, MenuScene, PlayScene ]
             });
-            // 288, 505, Phaser.AUTO, "content", null);
-
-            // this.state.add("play", PlayState, false);
-            // this.state.add("preload", PreloadState, false);
-            // this.state.add("boot", BootState, false);
-            // this.state.add("menu", MenuState, false);
-
-            // this.state.start("boot");
         }
     }
 

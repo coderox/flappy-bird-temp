@@ -1,41 +1,36 @@
 namespace FlappyBird {
 
-    export class ScoreBoard extends Phaser.GameObjects.Group {
+    export class ScoreBoard extends Phaser.GameObjects.Container {
 
-        scoreText: Phaser.GameObjects.BitmapText | undefined;
-        bestText: Phaser.GameObjects.BitmapText | undefined;
+        scoreText: Phaser.GameObjects.BitmapText;
+        bestText: Phaser.GameObjects.BitmapText;
         //startButton: Phaser.GameObjects.Button;
-        scoreboard: Phaser.GameObjects.Sprite | undefined;
+        scoreboard: Phaser.GameObjects.Image;
 
         constructor(scene: Phaser.Scene) {
-            super(scene);
+            super(scene,0, scene.sys.canvas.height);
 
-            // var gameover = this.create(this.game.width / 2, 100, "gameover");
-            // gameover.anchor.setTo(0.5, 0.5);
+            let gameover = this.scene.add.image(this.scene.sys.canvas.width / 2, 100, "gameover");
+            //gameover.anchor.setTo(0.5, 0.5);
 
-            // this.scoreboard = this.create(this.game.width / 2, 200, "scoreboard");
+            this.scoreboard = this.scene.add.image(this.scene.sys.canvas.width / 2, 200, "scoreboard");
             // this.scoreboard.anchor.setTo(0.5, 0.5);
 
-            // this.scoreText = this.game.add.bitmapText(this.scoreboard.width, 180, "flappyfont", "", 18);
-            // this.add(this.scoreText);
+            this.scoreText = this.scene.add.bitmapText(this.scoreboard.width, 180, "flappyfont", "", 18);
+            //this.add(this.scoreText);
 
-            // this.bestText = this.game.add.bitmapText(this.scoreboard.width, 230, "flappyfont", "", 18);
+            this.bestText = this.scene.add.bitmapText(this.scoreboard.width, 230, "flappyfont", "", 18);
             // this.add(this.bestText);
 
-            // // add our start button with a callback
-            // this.startButton = this.game.add.button(this.game.width/2, 300, "startButton", this.startClick, this);
-            // this.startButton.anchor.setTo(0.5,0.5);
-
-            // this.add(this.startButton);
-
-            // this.y = this.game.height;
-            // this.x = 0;
+            let startButton = this.scene.add.image(this.scene.sys.canvas.width/2, 300, "startButton")
+            startButton.setInteractive();
+            startButton.on("pointerup", this.startClick, this);
         }
 
         show(score: number) {
             let coin: Phaser.GameObjects.Sprite | undefined;
             let bestScore: number = 0;
-            //this.scoreText.setText(score.toString());
+            this.scoreText.setText(score.toString());
             if(localStorage) {
                 let existingScore = localStorage.getItem("bestScore");
                 if(existingScore) {
@@ -47,7 +42,7 @@ namespace FlappyBird {
                 }
             }
 
-            // this.bestText.setText(bestScore.toString());
+            this.bestText.setText(bestScore.toString());
 
             if(score >= 10 && score < 20) {
                 coin = this.scene.add.sprite(-65 , 7, "medals", 1);
@@ -56,17 +51,23 @@ namespace FlappyBird {
             }
 
             //this.scene.add.tween(this).to({y: 0}, 1000, Phaser.Easing.Bounce.Out, true);
+            this.scene.tweens.add({ 
+                targets: this,
+                y: 0, 
+                duration: 1000,
+                ease: "bounce"
+            });
 
             if (coin) {
                 coin.setOrigin(0.5, 0.5);
-                if(this.scoreboard){
-                    //this.scoreboard.addChild(coin);
-                }
+                // if(this.scoreboard){
+                //     this.scoreboard.addChild(coin);
+                // }
             }
         }
 
         startClick() {
-            //this.game.state.start("play");
+            this.scene.scene.start("play");
         }
     }
 }

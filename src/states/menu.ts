@@ -1,42 +1,60 @@
 namespace FlappyBird {
 
     export class MenuScene extends Phaser.Scene {
+        ground: Ground | undefined;
+        panorama: Panorama | undefined;
 
         constructor() {
-            super("menu");
+            super({key:"menu"});
         }
 
         create() {
-            // this.game.add.sprite(0, 0, "sky");
+            this.add.image(0, 0, "sky").setOrigin(0,0);
 
-            // let panorama = new Panorama(this.game);
-            // this.add.existing(panorama);
+            this.panorama = new Panorama(this);
+            this.add.group(this.panorama);
             
-            // let ground = this.game.add.tileSprite(0, 400, 335, 112, "ground");
-            // ground.autoScroll(-200, 0);
+            this.ground = new Ground(this,0, 400, 335, 112)
+                .setOrigin(0,0);
+            this.add.existing(this.ground);
 
-            // let titleGroup = this.game.add.group()
+            let titleGroup = this.add.container(30,100);
 
-            // let title = this.add.sprite(0, 0, "title");
-            // titleGroup.add(title);
+            let title = this.add.sprite(0, 0, "title")
+                .setOrigin(0,0);
+            titleGroup.add(title);
 
-            // let bird = this.add.sprite(200, 5, "bird");
-            // titleGroup.add(bird);
+            let bird = this.add.sprite(200, 5, "bird")
+                .setOrigin(0,0);
+            titleGroup.add(bird);
 
-            // bird.animations.add("flap");
-            // bird.animations.play("flap", 12, true);
+            this.anims.create({
+                key: "flap", 
+                frames: this.anims.generateFrameNames("bird"),
+                frameRate: 12,
+                repeat: -1});
+            bird.anims.play("flap");
 
-            // titleGroup.x = 30;
-            // titleGroup.y = 100;
+            this.tweens.add({ 
+                targets: titleGroup,
+                y: 115, 
+                duration: 350,
+                ease: "Linear",
+                yoyo: true,
+                loop: -1});
 
-            // this.game.add.tween(titleGroup).to({y:115}, 350, Phaser.Easing.Linear.None, true, 0, 1000, true);
+            let startButton = this.add.image(this.sys.canvas.width/2, 300, "startButton")
+            startButton.setInteractive();
+            startButton.on("pointerup", this.startClick, this);
+        }
 
-            // let startButton = this.game.add.button(this.game.width/2, 300, "startButton", this.startClick, this);
-            // startButton.anchor.setTo(0.5, 0.5);
+        update() {
+            this.panorama!.update();
+            this.ground!.update();
         }
 
         startClick() {
-            // this.game.state.start("play");
+            this.scene.start("play");
         }
     }
 }

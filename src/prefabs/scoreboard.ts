@@ -10,21 +10,24 @@ namespace FlappyBird {
         constructor(scene: Phaser.Scene) {
             super(scene,0, scene.sys.canvas.height);
 
-            let gameover = this.scene.add.image(this.scene.sys.canvas.width / 2, 100, "gameover");
-            //gameover.anchor.setTo(0.5, 0.5);
+            let gameover = scene.add.image(this.scene.sys.canvas.width / 2, 100, "gameover");
+            this.add(gameover);
 
-            this.scoreboard = this.scene.add.image(this.scene.sys.canvas.width / 2, 200, "scoreboard");
+            //gameover.anchor.setTo(0.5, 0.5);
+            this.scoreboard = scene.add.image(this.scene.sys.canvas.width / 2, 200, "scoreboard");
+            this.add(this.scoreboard);
             // this.scoreboard.anchor.setTo(0.5, 0.5);
 
-            this.scoreText = this.scene.add.bitmapText(this.scoreboard.width, 180, "flappyfont", "", 18);
-            //this.add(this.scoreText);
+            this.scoreText = scene.add.bitmapText(this.scoreboard.width, 180, "flappyfont", "", 18);
+            this.add(this.scoreText);
 
-            this.bestText = this.scene.add.bitmapText(this.scoreboard.width, 230, "flappyfont", "", 18);
-            // this.add(this.bestText);
+            this.bestText = scene.add.bitmapText(this.scoreboard.width, 230, "flappyfont", "", 18);
+            this.add(this.bestText);
 
-            let startButton = this.scene.add.image(this.scene.sys.canvas.width/2, 300, "startButton")
+            let startButton = scene.add.image(this.scene.sys.canvas.width/2, 300, "startButton")
             startButton.setInteractive();
             startButton.on("pointerup", this.startClick, this);
+            this.add(startButton);
         }
 
         show(score: number) {
@@ -44,26 +47,17 @@ namespace FlappyBird {
 
             this.bestText.setText(bestScore.toString());
 
-            if(score >= 10 && score < 20) {
-                coin = this.scene.add.sprite(-65 , 7, "medals", 1);
-            } else if(score >= 20) {
-                coin = this.scene.add.sprite(-65 , 7, "medals", 0);
+            if(score >= 10) {
+                coin = this.scene.add.sprite(this.scoreboard.x - 65, this.scoreboard.y + 7, "medals", score >= 20 ? 0 : 1);
+                this.add(coin);
             }
 
-            //this.scene.add.tween(this).to({y: 0}, 1000, Phaser.Easing.Bounce.Out, true);
             this.scene.tweens.add({ 
                 targets: this,
                 y: 0, 
                 duration: 1000,
                 ease: "bounce"
             });
-
-            if (coin) {
-                coin.setOrigin(0.5, 0.5);
-                // if(this.scoreboard){
-                //     this.scoreboard.addChild(coin);
-                // }
-            }
         }
 
         startClick() {

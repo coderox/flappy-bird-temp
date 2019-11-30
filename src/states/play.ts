@@ -98,10 +98,10 @@ namespace FlappyBird {
                 && pipeGroup.x <= this.bird.x) {
                 pipeGroup.hasScored = true;
                 this.score++;
-                if(this.scoreText) {
+                if(this.scoreText){
                     this.scoreText.setText(this.score.toString());
                 }
-                // if(this.scoreSound)
+                    // if(this.scoreSound)
                 //     this.scoreSound.play();
             }
         }
@@ -182,11 +182,9 @@ namespace FlappyBird {
                 }
                 pipeGroup.reset(this.sys.canvas.width, pipeY);
             }
-
-            if(this.ground && this.bird && this.scoreText) {
+            if(this.ground && this.bird) {
                 this.children.bringToTop(this.ground);
                 this.children.bringToTop(this.bird);
-                this.children.bringToTop(this.scoreText);
             }
         }
     }

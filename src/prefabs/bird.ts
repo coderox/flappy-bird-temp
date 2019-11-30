@@ -1,41 +1,62 @@
 namespace FlappyBird {
 
-    export class Bird extends Phaser.Sprite {
+    export class Bird extends Phaser.GameObjects.Sprite {
 
-        flapSound: Phaser.Sound;
-        onGround: Boolean;
+        flapSound: Phaser.Sound.BaseSound | undefined;
+        onGround: boolean;
+        public alive: boolean;
 
-        constructor(game: Phaser.Game, x: number, y: number, frame: number) {
-            super(game, x, y, "bird", frame);
-            this.anchor.setTo(0.5, 0.5);
-            this.animations.add("flap");
-            this.animations.play("flap", 12, true);
+        constructor(scene: Phaser.Scene, x: number, y: number, frame: number) {
+            super(scene, x, y, "bird", frame);
+            //this.setOrigin(this.width/2, this.height/2);
 
-            this.flapSound = this.game.add.audio('flap');
+            this.anims.animationManager.create({
+                key: "flap", 
+                frames: this.anims.animationManager.generateFrameNames("bird"),
+                frameRate: 12,
+                repeat: -1});
+            this.anims.play("flap");
 
-            this.alive = false;
+            // this.flapSound = this.game.add.audio('flap');
+
+            this.active = true;
             this.onGround = false;
+            this.alive = false;
 
             // enable physics on the bird
             // and disable gravity on the bird
             // until the game is started
             // also make sure the collisions are using circular body
-            this.game.physics.arcade.enableBody(this);
-            this.body.setCircle(13, 5, -2);
-            this.body.allowGravity = false;
-            this.body.collideWorldBounds = true;
+            this.scene.physics.world.enableBody(this);
+            if(this.body instanceof Phaser.Physics.Arcade.Body){
+                this.body.setCircle(13, 5, -2);
+                this.body.allowGravity = false;
+                this.body.collideWorldBounds = true;
+            }
+        }
 
-            this.events.onKilled.add(this.onKilled, this);
+        setAlive(alive: boolean) { 
+            this.alive = alive;
+            if(this.body instanceof Phaser.Physics.Arcade.Body) {
+                this.body.allowGravity = alive;
+                this.body.setGravityY(1200);
+            }
         }
 
         flap() {
-            if(this.alive) {
+            if(this.alive && this.active) {
                 this.onGround = false;
-                this.flapSound.play();
+                //this.flapSound.play();
                 //cause our bird to "jump" upward
-                this.body.velocity.y = -400;
+                if(this.body instanceof Phaser.Physics.Arcade.Body) {
+                    this.body.velocity.y = -400;
+                }
                 // rotate the bird to -40 degrees
-                this.game.add.tween(this).to({angle: -40}, 100).start();
+                this.scene.tweens.add({ 
+                    targets: this,
+                    angle: -40, 
+                    duration: 100
+                });
             } 
         }
 
@@ -45,18 +66,18 @@ namespace FlappyBird {
             if(this.angle < 90 && this.alive) {
                 this.angle += 2.5;
             }
-
-            if(!this.alive) {
-                this.body.velocity.x = 0;
-            } 
         }
 
-        onKilled() {
-            this.exists = true;
+        stop() {
             this.visible = true;
-            this.animations.stop();
+            this.active = false;
+            this.anims.stop();
             let duration = 90 / this.y * 300;
-            this.game.add.tween(this).to({angle: 90}, duration).start();
+            this.scene.tweens.add({ 
+                targets: this,
+                angle: 90, 
+                duration: duration
+            });
         }
     }
 }

@@ -1,18 +1,23 @@
-/// <reference path="../phaser-ce/typescript/phaser.d.ts"/>
+/// <reference path="../phaser/types/phaser.d.ts"/>
 
 namespace FlappyBird {
 
     export class Game extends Phaser.Game {
 
         constructor() {
-            super(288, 505, Phaser.AUTO, "content", null);
-
-            this.state.add("play", PlayState, false);
-            this.state.add("preload", PreloadState, false);
-            this.state.add("boot", BootState, false);
-            this.state.add("menu", MenuState, false);
-
-            this.state.start("boot");
+            super({
+                type: Phaser.AUTO,
+                width: 288,
+                height: 505,
+                parent: 'content',
+                physics: { 
+                    default: 'arcade',
+                    arcade: {
+                        y: 1200,
+                        //debug: true,
+                    }},
+                scene: [ BootScene, MenuScene, PlayScene ]
+            });
         }
     }
 

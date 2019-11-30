@@ -182,9 +182,10 @@ namespace FlappyBird {
                 }
                 pipeGroup.reset(this.sys.canvas.width, pipeY);
             }
-            if(this.ground && this.bird) {
+            if(this.ground && this.bird && this.scoreText) {
                 this.children.bringToTop(this.ground);
                 this.children.bringToTop(this.bird);
+                this.children.bringToTop(this.scoreText);
             }
         }
     }

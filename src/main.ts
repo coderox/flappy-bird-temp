@@ -14,7 +14,7 @@ namespace FlappyBird {
                     default: 'arcade',
                     arcade: {
                         y: 1200,
-                        debug: true,
+                        //debug: true,
                     }},
                 scene: [ BootScene, MenuScene, PlayScene ]
             });

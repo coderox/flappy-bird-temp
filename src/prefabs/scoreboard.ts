@@ -48,7 +48,7 @@ namespace FlappyBird {
             this.bestText.setText(bestScore.toString());
 
             if(score >= 10) {
-                coin = this.scene.add.sprite(this.scoreboard.x - 65, this.scoreboard.y + 7, "medals", score >= 20 ? 0 : 1);
+                coin = this.scene.add.sprite(this.scoreboard.x - 65, this.scoreboard.y + 7, "medals", score >= 20 ? 1 : 0);
                 this.add(coin);
             }
 
